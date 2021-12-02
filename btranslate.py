@@ -14,7 +14,7 @@ class Translator:
     TRANSLATE_WEBSITE = TRANSLATE_API_ROOT + '/translator'
     TRANSLATE_API = TRANSLATE_API_ROOT + '/ttranslatev3?isVertical=1\u0026'
     TRANSLATE_SPELL_CHECK_API = TRANSLATE_API_ROOT + '/tspellcheckv3?isVertical=1\u0026'
-    USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36'
+    USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36'
     CONTENT_TYPE = 'application/x-www-form-urlencoded'
 
     MAX_TEXT_LEN = 1000
@@ -32,13 +32,19 @@ class Translator:
     RequestSession = None
 
     
-    def Translate(self, text:str, from_l:str, to_l:str):
+    def Translate(self, text:str, from_l:str, to_l:str) -> dict:
         if len(text) > self.MAX_TEXT_LEN:
             raise Exception("The max length of the text must be " + self.MAX_TEXT_LEN + ". Please shorten the text.")
         req_body = urllib.parse.urlencode(self.MakeRequest(False, text, from_l, to_l))
         req_url = self.MakeRequestUrl(False)
         resp = self.RedirectedPost(req_url, req_body)
         resp.encoding = 'utf-8'
+        try:
+            if (resp.json()['ShowCaptcha']):
+                print("Warning : ShowCaptcha : true : Bing is onto us! Cool it with the translations!")
+                return ''
+        except:
+            pass
         return resp.json()
 
         
